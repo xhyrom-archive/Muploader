@@ -1,6 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
-import formidable from 'formidable';
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+// @ts-ignore
+import * as formidable from 'formidable';
 import axios from 'axios';
 
 type Data = {
