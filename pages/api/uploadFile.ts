@@ -22,7 +22,7 @@ export default async function handler(
     if (req.method !== 'POST') return res.status(403).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
 
     const maxFileSize = 1000000000;
-    const form = new formidable.IncomingForm({ uploadDir: './uploads', keepExtensions: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
+    const form: any = new formidable.IncomingForm({ uploadDir: './uploads', keepExtensions: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
 
     form.on('field', async(name: any, value: any) => {
       if (name === 'gcaptcha') {
