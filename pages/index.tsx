@@ -1,9 +1,64 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import type { NextPage } from 'next';
+import Head from 'next/head';
+import { createRef, LegacyRef, useEffect, useState } from 'react';
+import ReCAPTCHA from "react-google-recaptcha";
+import styles from '../styles/Home.module.css';
+import axios from 'axios';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
+  const recaptchaRef: LegacyRef<ReCAPTCHA> = createRef();
+  const [fileName, setFileName] = useState('Nothing');
+  const [infoAlert, setInfoAlert]: any = useState({ nothing: true });
+
+  useEffect(() => {
+    const $recaptcha = document.querySelector('#g-recaptcha-response');
+    if($recaptcha) $recaptcha.setAttribute("required", "required");
+  })
+
+  const handleSubmit = async(event: any) => {
+    event.preventDefault();
+
+    if (recaptchaRef.current?.getValue()?.length === 0) return;
+  
+    const form = new FormData();
+
+    let file: any = document.getElementById('fileInput');
+    file = file?.files?.[0] || file;
+
+    if (file.size > 1000000000) return setInfoAlert({ message: 'Maximum allowed size is 1GB' });
+
+    form.append('file', file);
+    form.append('gcaptcha', recaptchaRef.current?.getValue() || 'none');
+
+    recaptchaRef.current?.reset();
+
+    const res = await axios({
+      method: 'POST',
+      url: '/api/uploadFile',
+      data: form,
+      onUploadProgress: (p) => {
+        setInfoAlert({ message: `${p.loaded} / ${p.total}` });
+      }
+    }).catch(e => e?.response)
+
+    if (res.data?.message?.path) setInfoAlert({
+      url: `${window.location}api/files?name=${res.data.message.path}`
+    });
+    else setInfoAlert({ message: `Error: ${res.data.message} (${res.status})` })
+
+    const fileUploadForm: any = document.getElementById('fileUploadForm');
+    fileUploadForm?.reset();
+    setFileName('Nothing');
+
+    return;
+  }
+
+  const changeInput = (obj: any) => {
+    const name = obj.target.files[0].name;
+    setFileName(name);
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -12,61 +67,48 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+      <main>
+        <h1 className="title">
+          Easy to share files!
         </h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
+        { !infoAlert.nothing ? <div className="notification is-primary is-light">
+          { infoAlert.url ? <Link href={infoAlert.url}>{infoAlert.url}</Link> : infoAlert.message }
+        </div> : '' } 
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+        <form className="box" onSubmit={handleSubmit} id='fileUploadForm'>
+          <div className="field file is-boxed is-fullwidth">
+            <label className="file-label">
+              <input className="file-input" onChange={changeInput} type="file" name="resume" id='fileInput' required/>
+              <span className="file-cta">
+                <span className="file-icon">
+                  <i className="fas fa-upload"></i>
+                </span>
+                <span className="file-label">
+                  Choose a file…
+                </span>
+              </span>
+              <span className="file-name">
+                { fileName }
+              </span>
+            </label>
+          </div>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+          <div className="field is-boxed">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              size='normal'
+              sitekey={process.env.SITE_KEY || '6Lclp5UdAAAAABDuMBby76TirdHWs6MNfawyK-8B'}
+	          />
+          </div>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+          <div className="field control has-text-centered">
+            <button className="button is-primary" type='submit'>Submit</button>
+          </div>
+        </form>
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   )
 }
 
-export default Home
+export default Home;
