@@ -1,5 +1,7 @@
 {
   "name": "muploader",
+  "license": "MIT",
+  "author": "xHyroM",
   "private": true,
   "scripts": {
     "dev": "next dev",
