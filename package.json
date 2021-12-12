@@ -12,7 +12,7 @@
   "dependencies": {
     "@types/react-google-recaptcha": "^2.1.2",
     "axios": "^0.24.0",
-    "formidable": "^3.1.3",
+    "formidable": "github:node-formidable/formidable#no-empty-file-on-error",
     "next": "12.0.7",
     "react": "17.0.2",
     "react-dom": "17.0.2",
