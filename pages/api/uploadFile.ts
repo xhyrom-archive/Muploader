@@ -6,6 +6,8 @@ import * as formidable from 'formidable';
 import axios from 'axios';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
+import path from 'path';
+import fs from 'fs';
 
 type Data = {
   name: string;
@@ -26,7 +28,7 @@ function handler(
     if (req.method !== 'POST') return res.status(403).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
 
     const maxFileSize = 1000000000;
-    const form: any = new formidable.IncomingForm({ uploadDir: './uploads', keepExtensions: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
+    const form: any = new formidable.IncomingForm({ uploadDir: `./uploads/`, keepExtensions: true, keepFilenames: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
 
     form.on('field', async(name: any, value: any) => {
       if (name === 'gcaptcha') {
@@ -44,7 +46,23 @@ function handler(
       }
     })
 
-    form.parse(req, async(err: any, fields: any, files: any) => {
+    form.parse(req, async(err: any, fields: any, files: any) => {   
+      if (!files || files.length === 0) {
+        return res.status(422).json({
+          name: 'UNPROCESSABLE ENTITY',
+          message: 'Missing files!'
+        })
+      }
+
+      if (!fields || fields.length === 0 || !fields['gcaptcha']) {
+        fs.unlinkSync(`./uploads/${files.file[0].newFilename.toString()}`);
+        
+        return res.status(422).json({
+          name: 'UNPROCESSABLE ENTITY',
+          message: 'Missing gcaptcha!'
+        })
+      }
+
       if (err) {
         return res.status(413).json({
           name: 'TOO LARGE',
@@ -52,13 +70,14 @@ function handler(
         })
       }
 
-      await file.create({ id: files.file[0].newFilename.toString(), path: `./uploads/${files.file[0].newFilename.toString()}` });
+      const randomFileName = path.parse(files.file[0].newFilename.toString()).name;
+      await file.create({ id: randomFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString() });
 
       res.status(200).json({ 
         name: 'OK',
         message: {
-          msg: 'File has been uploaded',
-          path: files.file[0].newFilename.toString()
+          msg: 'File has been uploaded.',
+          path: randomFileName
         }, 
       })
     });
