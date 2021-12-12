@@ -24,14 +24,12 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  if (!req.query.id) return res.status(403).json({ name: 'BAD REQUEST', message: 'Please add ?name to query' })
+  if (!req.query.id) return res.status(403).json({ name: 'BAD REQUEST', message: 'Please add ?id to query' })
     
   const fileId = req.query.id as string;
 
   const schema = await file.findOne({ id: fileId }).exec();
-  if (!schema) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?name' });
-
-  if (!fs.realpathSync(schema.path).includes(`uploads\\${fileId}`)) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?name' })
+  if (!schema) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?id' });
 
   switch(req.method) {
     case 'GET':
