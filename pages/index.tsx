@@ -26,7 +26,7 @@ const Home: NextPage = () => {
     if (process.env.NEXT_PUBLIC_AUTHORIZATION) {
       result = await Swal.fire({
         title: 'Your Authorization Token',
-        input: 'text',
+        input: 'password',
         inputAttributes: {
           autocapitalize: 'off'
         },
