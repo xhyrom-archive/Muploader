@@ -12,12 +12,16 @@
   "dependencies": {
     "@types/react-google-recaptcha": "^2.1.2",
     "axios": "^0.24.0",
+    "bson-ext": "^4.0.2",
     "formidable": "github:node-formidable/formidable#no-empty-file-on-error",
+    "kerberos": "^1.1.7",
+    "mongodb-client-encryption": "^1.2.7",
     "mongoose": "^6.1.1",
     "next": "12.0.7",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-google-recaptcha": "^2.1.0"
+    "react-google-recaptcha": "^2.1.0",
+    "snappy": "^7.0.5"
   },
   "devDependencies": {
     "@types/node": "16.11.12",
