@@ -24,7 +24,8 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  if (!req.query.id) return res.status(403).json({ name: 'BAD REQUEST', message: 'Please add ?id to query' })
+  if (!req.query.id) return res.status(400).json({ name: 'BAD REQUEST', message: 'Please add ?id to query' })
+  if (process.env.NEXT_PUBLIC_AUTHORIZATION && (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) && (req.query.token !== process.env.AUTHORIZATION_TOKEN))  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
     
   const fileId = req.query.id as string;
 
@@ -45,7 +46,7 @@ async function handler(
       break;
 
     default:
-      res.status(403).json({ name: 'Bad Request', message: `Use GET/POST instead of ${req.method}` });
+      res.status(400).json({ name: 'Bad Request', message: `Use GET/POST instead of ${req.method}` });
       break;
   }
 }

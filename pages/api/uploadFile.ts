@@ -25,7 +25,8 @@ function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-    if (req.method !== 'POST') return res.status(403).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
+    if (req.method !== 'POST') return res.status(400).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
+    if (process.env.NEXT_PUBLIC_AUTHORIZATION && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
 
     const maxFileSize = 1000000000;
     const form: any = new formidable.IncomingForm({ uploadDir: `./uploads/`, keepExtensions: true, keepFilenames: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
