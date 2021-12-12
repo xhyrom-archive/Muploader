@@ -4,6 +4,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 // @ts-ignore
 import * as formidable from 'formidable';
 import axios from 'axios';
+import connectDB from '../../middleware/mongodb';
+import file from '../../models/file';
 
 type Data = {
   name: string;
@@ -17,7 +19,7 @@ export const config = {
     }
 }
 
-export default async function handler(
+function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
@@ -42,13 +44,15 @@ export default async function handler(
       }
     })
 
-    form.parse(req, (err: any, fields: any, files: any) => {
+    form.parse(req, async(err: any, fields: any, files: any) => {
       if (err) {
         return res.status(413).json({
           name: 'TOO LARGE',
           message: typeof err === 'object' ? 'Maximum allowed size is 1 GB' : err
         })
       }
+
+      await file.create({ id: files.file[0].newFilename.toString(), path: `./uploads/${files.file[0].newFilename.toString()}` });
 
       res.status(200).json({ 
         name: 'OK',
@@ -61,3 +65,5 @@ export default async function handler(
 
     // TODO: Delete after X minutes
 }
+
+export default connectDB(handler);

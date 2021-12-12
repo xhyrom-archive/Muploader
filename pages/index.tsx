@@ -43,8 +43,8 @@ const Home: NextPage = () => {
     }).catch(e => e?.response)
 
     if (res.data?.message?.path) setInfoAlert({
-      url: `${window.location}api/files?name=${res.data.message.path}`,
-      deleteUrl: `${window.location}api/files?name=${res.data.message.path}&del=true`
+      url: `${window.location}api/files?id=${res.data.message.path}`,
+      deleteUrl: `${window.location}api/files?id=${res.data.message.path}&del=true`
     });
     else setInfoAlert({ message: `Error: ${res.data.message} (${res.status})` })
 
