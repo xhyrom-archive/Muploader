@@ -43,7 +43,8 @@ const Home: NextPage = () => {
     }).catch(e => e?.response)
 
     if (res.data?.message?.path) setInfoAlert({
-      url: `${window.location}api/files?name=${res.data.message.path}`
+      url: `${window.location}api/files?name=${res.data.message.path}`,
+      deleteUrl: `${window.location}api/files?name=${res.data.message.path}&del=true`
     });
     else setInfoAlert({ message: `Error: ${res.data.message} (${res.status})` })
 
@@ -73,7 +74,9 @@ const Home: NextPage = () => {
         </h1>
 
         { !infoAlert.nothing ? <div className="notification is-primary is-light">
-          { infoAlert.url ? <Link href={infoAlert.url}>{infoAlert.url}</Link> : infoAlert.message }
+          { infoAlert.url ? 
+          <><Link href={infoAlert.url}><a>Download: {infoAlert.url}</a></Link><br /><Link href={infoAlert.deleteUrl}><a>Delete: {infoAlert.deleteUrl}</a></Link></>
+          : infoAlert.message }
         </div> : '' } 
 
         <form className="box" onSubmit={handleSubmit} id='fileUploadForm'>

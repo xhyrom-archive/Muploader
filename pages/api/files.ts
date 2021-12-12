@@ -8,15 +8,40 @@ type Data = {
     data?: object;
 }
 
+function deleteFile(res: NextApiResponse<Data>, fileName: string) {
+  fs.unlinkSync(`./uploads/${fileName}`);
+  res.status(200).json({
+    name: 'OK',
+    message: 'File has been deleted!'
+  })
+}
+
 export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-    if (!req.query.name) return res.status(403).json({ name: 'BAD REQUEST', message: 'Please add ?name to query' })
+  if (!req.query.name) return res.status(403).json({ name: 'BAD REQUEST', message: 'Please add ?name to query' })
     
-    const fileName = req.query.name;
-    if (!fs.existsSync(`./uploads/${fileName}`)) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?name' })
+  const fileName = req.query.name as string;
 
-    res.setHeader("content-disposition", "attachment; filename=" + fileName);
-    res.status(200).end(fs.readFileSync(`./uploads/${fileName}`));
+  if (!fs.existsSync(`./uploads/${fileName}`)) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?name' })
+  if (!fs.realpathSync(`./uploads/${fileName}`).includes(`muploader\\uploads\\${fileName}`)) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?name' })
+
+  switch(req.method) {
+    case 'GET':
+      if (req.query.del) deleteFile(res, fileName);
+      else {
+        res.setHeader("content-disposition", "attachment; filename=" + fileName);
+        res.status(200).end(fs.readFileSync(`./uploads/${fileName}`));
+      }
+      break;
+
+    case 'DELETE':
+      deleteFile(res, fileName)
+      break;
+
+    default:
+      res.status(403).json({ name: 'Bad Request', message: `Use GET/POST instead of ${req.method}` });
+      break;
+  }
 }
