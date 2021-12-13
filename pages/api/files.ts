@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import * as fs from 'fs';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
+import { strToBool } from '../../utils/stringToBool';
 
 type Data = {
     name: string;
@@ -10,7 +11,13 @@ type Data = {
     data?: object;
 }
 
-function deleteFile(res: NextApiResponse<Data>, fileId: string, path: string) {
+function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, path: string) {
+  if (
+    strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) &&
+    (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) &&
+    (req.query.token !== process.env.AUTHORIZATION_TOKEN)
+  )  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
+
   file.findOneAndDelete({ id: fileId }, () => {});
 
   fs.unlinkSync(path);
@@ -25,16 +32,22 @@ async function handler(
   res: NextApiResponse<Data>
 ) {
   if (!req.query.id) return res.status(400).json({ name: 'BAD REQUEST', message: 'Please add ?id to query' })
-  if (process.env.NEXT_PUBLIC_AUTHORIZATION && (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) && (req.query.token !== process.env.AUTHORIZATION_TOKEN))  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
-    
+
   const fileId = req.query.id as string;
 
   const schema = await file.findOne({ id: fileId }).exec();
   if (!schema) return res.status(404).json({ name: 'NOT FOUND', message: 'Invalid ?id' });
 
+  if (
+    strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) &&
+    (!schema.withoutAuth) &&
+    (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) &&
+    (req.query.token !== process.env.AUTHORIZATION_TOKEN)
+  )  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
+
   switch(req.method) {
     case 'GET':
-      if (req.query.del) deleteFile(res, fileId, schema.path);
+      if (req.query.del) deleteFile(req, res, fileId, schema.path);
       else {
         res.setHeader("content-disposition", "attachment; filename=" + schema.fileName);
         res.status(200).end(fs.readFileSync(schema.path));
@@ -42,7 +55,7 @@ async function handler(
       break;
 
     case 'DELETE':
-      deleteFile(res, fileId, schema.path)
+      deleteFile(req, res, fileId, schema.path)
       break;
 
     default:

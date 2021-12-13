@@ -6,6 +6,7 @@ import Swal from 'sweetalert2'
 import styles from '../styles/Home.module.css';
 import axios from 'axios';
 import Link from 'next/link';
+import { strToBool } from '../utils/stringToBool';
 
 const Home: NextPage = () => {
   const recaptchaRef: LegacyRef<ReCAPTCHA> = createRef();
@@ -17,13 +18,21 @@ const Home: NextPage = () => {
     if($recaptcha) $recaptcha.setAttribute("required", "required");
   })
 
+  const clearForm = () => {
+    const fileUploadForm: any = document.getElementById('fileUploadForm');
+
+    recaptchaRef.current?.reset();
+    fileUploadForm?.reset();
+    setFileName('Nothing');
+  }
+
   const handleSubmit = async(event: any) => {
     event.preventDefault();
 
     if (recaptchaRef.current?.getValue()?.length === 0) return;
   
     let result;
-    if (process.env.NEXT_PUBLIC_AUTHORIZATION) {
+    if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION)) {
       result = await Swal.fire({
         title: 'Your Authorization Token',
         input: 'password',
@@ -37,6 +46,17 @@ const Home: NextPage = () => {
       })
     } else result = null;
 
+    if ((result.isDenied) || (result.isDismissed)) {
+      clearForm();
+
+      setInfoAlert({
+        message: 'Error: Invalid authorization token! (403)'
+      })
+
+      return;
+    } 
+
+    const checkbox: any = document.getElementById('withoutAuth');
     const form = new FormData();
 
     let file: any = document.getElementById('fileInput');
@@ -46,6 +66,7 @@ const Home: NextPage = () => {
 
     form.append('file', file);
     form.append('gcaptcha', recaptchaRef.current?.getValue() || 'none');
+    if (checkbox) form.append('withoutAuth', checkbox.checked);
 
     recaptchaRef.current?.reset();
 
@@ -62,14 +83,12 @@ const Home: NextPage = () => {
     }).catch(e => e?.response)
 
     if (res.data?.message?.path) setInfoAlert({
-      url: `${window.location}api/files?id=${res.data.message.path}${result?.value ? `&token=${result.value}` : ''}`,
+      url: `${window.location}api/files?id=${res.data.message.path}${result?.value && !checkbox.checked ? `&token=${result.value}` : ''}`,
       deleteUrl: `${window.location}api/files?id=${res.data.message.path}&del=true${result?.value ? `&token=${result.value}` : ''}`
     });
     else setInfoAlert({ message: `Error: ${res.data.message} (${res.status})` })
 
-    const fileUploadForm: any = document.getElementById('fileUploadForm');
-    fileUploadForm?.reset();
-    setFileName('Nothing');
+    clearForm();
 
     return;
   }
@@ -123,6 +142,18 @@ const Home: NextPage = () => {
               sitekey={process.env.NEXT_PUBLIC_SITE_KEY}
 	          />
           </div>
+
+          { strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION)
+          ? <>
+            <div className="field control checkbox is-checkbox">
+              <label className="checkbox">
+                <input type="checkbox" id='withoutAuth' />
+                See file without authorization
+              </label>
+            </div>
+          </> :
+          <></> 
+          }
 
           <div className="field control has-text-centered">
             <button className="button is-primary" type='submit'>Submit</button>

@@ -8,6 +8,7 @@ import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
 import path from 'path';
 import fs from 'fs';
+import { strToBool } from '../../utils/stringToBool';
 
 type Data = {
   name: string;
@@ -26,7 +27,7 @@ function handler(
   res: NextApiResponse<Data>
 ) {
     if (req.method !== 'POST') return res.status(400).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
-    if (process.env.NEXT_PUBLIC_AUTHORIZATION && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
+    if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
 
     const maxFileSize = 1000000000;
     const form: any = new formidable.IncomingForm({ uploadDir: `./uploads/`, keepExtensions: true, keepFilenames: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
@@ -72,7 +73,11 @@ function handler(
       }
 
       const randomFileName = path.parse(files.file[0].newFilename.toString()).name;
-      await file.create({ id: randomFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString() });
+
+      let object: any = { id: randomFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString() };
+      if (fields.withoutAuth) object.withoutAuth = strToBool(fields.withoutAuth);
+
+      await file.create(object);
 
       res.status(200).json({ 
         name: 'OK',

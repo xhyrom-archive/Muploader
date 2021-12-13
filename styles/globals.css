@@ -20,3 +20,7 @@ main {
   justify-content: center;
   align-items: center;
 }
+
+input[type="checkbox"],[type="radio"] {
+  margin-right: .5em
+}
