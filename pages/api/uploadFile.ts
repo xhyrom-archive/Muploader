@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 // @ts-ignore
 import * as formidable from 'formidable';
-import axios from 'axios';
+import hyttpo from 'hyttpo';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
 import path from 'path';
@@ -34,15 +34,15 @@ function handler(
 
     form.on('field', async(name: any, value: any) => {
       if (name === 'gcaptcha') {
-        const verify = await axios(
+        const verify = await hyttpo.request(
           {
             url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${value}`,
             headers: {
               "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
             },
-            method: "POST",
+            method: "GET",
           }
-        ).catch(e => e?.response);
+        ).catch(e => e);
 
         if (!verify.data.success) form._error('Invalid captcha key!');
       }

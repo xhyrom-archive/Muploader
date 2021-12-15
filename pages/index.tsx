@@ -4,9 +4,9 @@ import { createRef, LegacyRef, useEffect, useState } from 'react';
 import ReCAPTCHA from "react-google-recaptcha";
 import Swal from 'sweetalert2'
 import styles from '../styles/Home.module.css';
-import axios from 'axios';
 import Link from 'next/link';
 import { strToBool } from '../utils/stringToBool';
+import hyttpo from 'hyttpo';
 
 const Home: NextPage = () => {
   const recaptchaRef: LegacyRef<ReCAPTCHA> = createRef();
@@ -70,17 +70,17 @@ const Home: NextPage = () => {
 
     recaptchaRef.current?.reset();
 
-    const res = await axios({
+    const res = await hyttpo.request({
       method: 'POST',
-      url: '/api/uploadFile',
-      data: form,
+      url: window.location + '/api/uploadFile',
+      body: form,
       headers: {
         'Authorization': result?.value
       },
       onUploadProgress: (p) => {
         setInfoAlert({ message: `${p.loaded} / ${p.total}` });
       }
-    }).catch(e => e?.response)
+    }).on('uploadProgress', () => {}).catch(e => e)
 
     if (res.data?.message?.path) setInfoAlert({
       url: `${window.location}api/files?id=${res.data.message.path}${result?.value && !checkbox.checked ? `&token=${result.value}` : ''}`,
