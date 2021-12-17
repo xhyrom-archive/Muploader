@@ -11,7 +11,7 @@ type Data = {
     data?: object;
 }
 
-function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, path: string) {
+function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, path: string, ui?: boolean) {
   if (
     strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) &&
     (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) &&
@@ -21,10 +21,15 @@ function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: str
   file.findOneAndDelete({ id: fileId }, () => {});
 
   fs.unlinkSync(path);
-  res.status(200).json({
-    name: 'OK',
-    message: 'File has been deleted!'
-  })
+
+  if (!ui) {
+    res.status(200).json({
+      name: 'OK',
+      message: 'File has been deleted!'
+    })
+  } else {
+    res.status(200).redirect('/?deleted');
+  }
 }
 
 async function handler(
@@ -47,7 +52,7 @@ async function handler(
 
   switch(req.method) {
     case 'GET':
-      if (req.query.del) deleteFile(req, res, fileId, schema.path);
+      if (req.query.del) deleteFile(req, res, fileId, schema.path, true);
       else {
         res.setHeader("content-disposition", "attachment; filename=" + schema.fileName);
         res.status(200).end(fs.readFileSync(schema.path));

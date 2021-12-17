@@ -11,12 +11,26 @@ import hyttpo from 'hyttpo';
 const Home: NextPage = () => {
   const recaptchaRef: LegacyRef<ReCAPTCHA> = createRef();
   const [fileName, setFileName] = useState('Nothing');
+
   const [infoAlert, setInfoAlert]: any = useState({ nothing: true });
 
   useEffect(() => {
     const $recaptcha = document.querySelector('#g-recaptcha-response');
     if($recaptcha) $recaptcha.setAttribute("required", "required");
   })
+
+  const formatBytes = (bytes: number, decimals?: number) => {
+    if (!decimals) decimals = 2;
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
 
   const clearForm = () => {
     const fileUploadForm: any = document.getElementById('fileUploadForm');
@@ -78,7 +92,9 @@ const Home: NextPage = () => {
         'Authorization': result?.value
       },
       onUploadProgress: (p) => {
-        setInfoAlert({ message: `${p.loaded} / ${p.total}` });
+        setInfoAlert({ 
+          message: `${formatBytes(p.loaded)} / ${formatBytes(p.total)}`
+        });
       }
     }).on('uploadProgress', () => {}).catch(e => e)
 
