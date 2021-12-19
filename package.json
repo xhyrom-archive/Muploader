@@ -15,7 +15,7 @@
     "aws4": "^1.11.0",
     "bson-ext": "^4.0.2",
     "formidable": "github:node-formidable/formidable",
-    "hyttpo": "^0.3.1",
+    "hyttpo": "^0.3.2",
     "i": "^0.3.7",
     "kerberos": "^1.1.7",
     "mongodb-client-encryption": "^1.2.7",

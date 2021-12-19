@@ -96,7 +96,7 @@ const Home: NextPage = () => {
           message: `${formatBytes(p.loaded)} / ${formatBytes(p.total)}`
         });
       }
-    }).on('uploadProgress', () => {}).catch(e => e)
+    }).catch(e => e)
 
     if (res.data?.message?.path) setInfoAlert({
       url: `${window.location}api/files?id=${res.data.message.path}${result?.value && !checkbox.checked ? `&token=${result.value}` : ''}`,
