@@ -54,8 +54,12 @@ async function handler(
     case 'GET':
       if (req.query.del) deleteFile(req, res, fileId, schema.path, true);
       else {
-        res.setHeader("content-disposition", "attachment; filename=" + schema.fileName);
-        res.status(200).end(fs.readFileSync(schema.path));
+        if (req.query.preview) {
+          res.status(200).end(fs.readFileSync(schema.path));
+        } else {
+          res.setHeader("content-disposition", "attachment; filename=" + schema.fileName);
+          res.status(200).end(fs.readFileSync(schema.path));
+        }
       }
       break;
 

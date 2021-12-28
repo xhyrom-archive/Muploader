@@ -7,8 +7,9 @@ import hyttpo from 'hyttpo';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
 import path from 'path';
-import fs from 'fs';
+import absoluteUrl from 'next-absolute-url'
 import { strToBool } from '../../utils/stringToBool';
+import { rateLimit } from '../../utils/rateLimit';
 
 type Data = {
   name: string;
@@ -22,6 +23,11 @@ export const config = {
     }
 }
 
+const limiter = rateLimit({
+  interval: process.env.sharexRateLimitInterval,
+  uniqueTokenPerInterval: 100,
+})
+
 function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -33,43 +39,56 @@ function handler(
     const form: any = new formidable.IncomingForm({ uploadDir: `./uploads/`, keepExtensions: true, keepFilenames: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
 
     form.on('field', async(name: any, value: any) => {
-      if (name === 'gcaptcha') {
-        const verify = await hyttpo.request(
-          {
-            url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${value}`,
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-            },
-            method: "GET",
-          }
-        ).catch(e => e);
-
-        if (!verify.data.success) form._error('Invalid captcha key!');
-      }
+      if (name === 'tos-accept' && !strToBool(value)) form._error('You must accept our ToS!');
     })
 
-    form.parse(req, async(err: any, fields: any, files: any) => {   
+    form.parse(req, async(err: any, fields: any, files: any) => {
+      if (err) {
+        res.setHeader('Connection', 'close');
+
+        return res.status(413).json({
+          name: 'TOO LARGE',
+          message: typeof err === 'object' ? 'Maximum allowed size is 1 GB' : err
+        });
+      }
+
       if (!files || files.length === 0) {
         return res.status(422).json({
           name: 'UNPROCESSABLE ENTITY',
           message: 'Missing files!'
-        })
+        });
       }
 
       if (!fields || fields.length === 0 || !fields['gcaptcha']) {
-        fs.unlinkSync(`./uploads/${files.file[0].newFilename.toString()}`);
-        
+        files.file[0].destroy();
+
         return res.status(422).json({
           name: 'UNPROCESSABLE ENTITY',
           message: 'Missing gcaptcha!'
-        })
+        });
       }
 
-      if (err) {
-        return res.status(413).json({
-          name: 'TOO LARGE',
-          message: typeof err === 'object' ? 'Maximum allowed size is 1 GB' : err
-        })
+      const verify = await hyttpo.request(
+        {
+          url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${fields['gcaptcha']}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+          },
+          method: "GET",
+        }
+      ).catch(e => e);
+
+      if (!verify.data.success) {
+        const rateLimit = limiter.check(res, process.env.sharexRateLimit, 'CACHE_TOKEN');
+        if (req.headers['user-agent'].includes('ShareX') && !rateLimit) {}
+        else {
+          files.file[0].destroy();
+          
+          return res.status(rateLimit ? 429 : 422).json({
+            name: rateLimit ? 'TOO MANY REQUESTS' : 'UNPROCESSABLE ENTITY',
+            message: rateLimit ? 'Rate limit' : 'Invalid captcha key!'
+          });
+        }
       }
 
       const randomFileName = path.parse(files.file[0].newFilename.toString()).name;
@@ -83,10 +102,11 @@ function handler(
         name: 'OK',
         message: {
           msg: 'File has been uploaded.',
-          path: randomFileName
+          path: randomFileName,
+          url: `${absoluteUrl(req).origin}/api/files?id=${randomFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&preview=true`
         }, 
       })
-    });
+    })
 
     // TODO: Delete after X minutes
 }
