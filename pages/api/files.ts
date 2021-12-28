@@ -68,7 +68,7 @@ async function handler(
       break;
 
     default:
-      res.status(400).json({ name: 'Bad Request', message: `Use GET/POST instead of ${req.method}` });
+      res.status(400).json({ name: 'Bad Request', message: `Use GET/DELETE instead of ${req.method}` });
       break;
   }
 }
