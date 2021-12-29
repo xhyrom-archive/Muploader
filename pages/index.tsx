@@ -179,7 +179,7 @@ const Home: NextPage = () => {
           <div className='field control checkbox is-checkbox'>
             <label className='checkbox'>
               <input type='checkbox' id='tosCheckbox' />
-              I agree to the <a href='/tos'>terms and services</a>
+              I agree to the <Link href='/tos'><a>terms and services</a></Link>
             </label>
           </div>
 
