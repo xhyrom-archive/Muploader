@@ -3,7 +3,7 @@
   "Name": "Muploader",
   "DestinationType": "ImageUploader",
   "RequestMethod": "POST",
-  "RequestURL": "https://url/api/uploadFile",
+  "RequestURL": "https://your-domain.sk/api/uploadFile",
   "Headers": {
     "Authorization": "authorization if you want"
   },
