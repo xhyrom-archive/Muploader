@@ -102,9 +102,9 @@ const Home: NextPage = () => {
     }).catch(e => e)
 
     if (res.data?.message?.path) setInfoAlert({
-      url: `${window.location}api/files?id=${res.data.message.path}${result?.value && !checkbox.checked ? `&token=${result.value}` : ''}`,
-      previewUrl: `${res.data.message.url}`,
-      deleteUrl: `${window.location}api/files?id=${res.data.message.path}&del=true${result?.value ? `&token=${result.value}` : ''}`
+      url: `${res.data.message.url}`,
+      downloadUrl: `${res.data.message.downloadUrl}`,
+      deleteUrl: `${res.data.message.deleteUrl}`
     });
     else setInfoAlert({ message: `Error: ${res.data.message} (${res.status})` })
 
@@ -133,7 +133,7 @@ const Home: NextPage = () => {
 
         { !infoAlert.nothing ? <div className='notification is-primary is-light'>
           { infoAlert.url ? 
-          <><Link href={infoAlert.url}><a>Download: {infoAlert.url}</a></Link><br /><Link href={infoAlert.previewUrl}><a>Preview: {infoAlert.previewUrl}</a></Link><br /><Link href={infoAlert.deleteUrl}><a>Delete: {infoAlert.deleteUrl}</a></Link></>
+          <><Link href={infoAlert.url}><a>Preview: {infoAlert.url}</a></Link><br /><Link href={infoAlert.downloadUrl}><a>Download: {infoAlert.downloadUrl}</a></Link><br /><Link href={infoAlert.deleteUrl}><a>Delete: {infoAlert.deleteUrl}</a></Link></>
           : infoAlert.message }
         </div> : '' } 
 

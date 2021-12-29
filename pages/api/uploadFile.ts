@@ -101,9 +101,10 @@ function handler(
         }
       }
 
+      const deleteKey = nanoid(15);
       const newFileName = path.parse(files.file[0].newFilename.toString()).name;
 
-      let object: any = { id: newFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString() };
+      let object: any = { id: newFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString(), deleteKey: deleteKey };
       if (fields.withoutAuth) object.withoutAuth = strToBool(fields.withoutAuth);
 
       await file.create(object);
@@ -113,7 +114,9 @@ function handler(
         message: {
           msg: 'File has been uploaded.',
           path: newFileName,
-          url: `${absoluteUrl(req).origin}/image?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`
+          url: `${absoluteUrl(req).origin}/image?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
+          downloadUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
+          deleteUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${process.env.AUTHORIZATION_TOKEN ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&del=${deleteKey}`,
         }, 
       })
     })

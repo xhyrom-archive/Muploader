@@ -11,12 +11,16 @@ type Data = {
     data?: object;
 }
 
-function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, path: string, ui?: boolean) {
+function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, deleteKey: string, path: string, ui?: boolean) {
   if (
     strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) &&
     (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) &&
     (req.query.token !== process.env.AUTHORIZATION_TOKEN)
   )  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
+
+  if (
+    req.query.del !== deleteKey
+  ) return res.status(403).json({ name: 'Forbidden', message: `Invalid delete key!` });
 
   file.findOneAndDelete({ id: fileId }, () => {});
 
@@ -52,7 +56,7 @@ async function handler(
 
   switch(req.method) {
     case 'GET':
-      if (req.query.del) deleteFile(req, res, fileId, schema.path, true);
+      if (req.query.del) deleteFile(req, res, fileId, schema.deleteKey, schema.path, true);
       else {
         if (req.query.preview) {
           res.status(200).end(fs.readFileSync(schema.path));
@@ -64,7 +68,7 @@ async function handler(
       break;
 
     case 'DELETE':
-      deleteFile(req, res, fileId, schema.path)
+      deleteFile(req, res, fileId, schema.deleteKey, schema.path)
       break;
 
     default:
