@@ -1,0 +1,18 @@
+{
+  "Version": "13.6.1",
+  "Name": "Muploader",
+  "DestinationType": "ImageUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://url/api/uploadFile",
+  "Headers": {
+    "Authorization": "authorization if you want"
+  },
+  "Body": "MultipartFormData",
+  "Arguments": {
+    "gcaptcha": "none",
+    "tos-accept": "true",
+    "withoutAuth": "true"
+  },
+  "FileFormName": "file",
+  "URL": "$json:message.url$"
+}

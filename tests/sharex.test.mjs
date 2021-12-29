@@ -13,7 +13,7 @@ import fs from 'fs';
         method: 'POST',
         url: 'http://localhost:3000/api/uploadFile',
         headers: {
-            'Authorization': 'ycxjoWEJOQPWeasf',
+            'Authorization': 'your key',
             'User-Agent': 'ShareX',
             ...form.getHeaders(),
         },
