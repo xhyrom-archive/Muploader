@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 // @ts-ignore
 import * as formidable from 'formidable';
+import { nanoid } from 'nanoid'
 import hyttpo from 'hyttpo';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
@@ -36,7 +37,15 @@ function handler(
     if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
 
     const maxFileSize = 1000000000;
-    const form: any = new formidable.IncomingForm({ uploadDir: `./uploads/`, keepExtensions: true, keepFilenames: true, maxFileSize: maxFileSize, allowEmptyFiles: false });
+    const form: any = new formidable.IncomingForm({
+      uploadDir: `./uploads/`,
+      keepExtensions: true,
+      maxFileSize: maxFileSize,
+      allowEmptyFiles: false,
+      filename: function (name, ext, part, form) {
+        return `${nanoid(36)}${ext}`;
+      }
+    });
 
     form.on('field', async(name: any, value: any) => {
       if (name === 'tos-accept' && !strToBool(value)) form._error('You must accept our ToS!');
@@ -44,6 +53,7 @@ function handler(
 
     form.parse(req, async(err: any, fields: any, files: any) => {
       if (err) {
+        console.log(err)
         res.setHeader('Connection', 'close');
 
         return res.status(413).json({
@@ -91,9 +101,9 @@ function handler(
         }
       }
 
-      const randomFileName = path.parse(files.file[0].newFilename.toString()).name;
+      const newFileName = path.parse(files.file[0].newFilename.toString()).name;
 
-      let object: any = { id: randomFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString() };
+      let object: any = { id: newFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString() };
       if (fields.withoutAuth) object.withoutAuth = strToBool(fields.withoutAuth);
 
       await file.create(object);
@@ -102,8 +112,8 @@ function handler(
         name: 'OK',
         message: {
           msg: 'File has been uploaded.',
-          path: randomFileName,
-          url: `${absoluteUrl(req).origin}/api/files?id=${randomFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&preview=true`
+          path: newFileName,
+          url: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&preview=true`
         }, 
       })
     })

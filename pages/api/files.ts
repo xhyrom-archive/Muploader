@@ -28,7 +28,7 @@ function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: str
       message: 'File has been deleted!'
     })
   } else {
-    res.status(200).redirect('/?deleted');
+    res.status(200).redirect('/');
   }
 }
 
