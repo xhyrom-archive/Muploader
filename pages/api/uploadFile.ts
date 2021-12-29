@@ -113,7 +113,7 @@ function handler(
         message: {
           msg: 'File has been uploaded.',
           path: newFileName,
-          url: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&preview=true`
+          url: `${absoluteUrl(req).origin}/image?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`
         }, 
       })
     })
