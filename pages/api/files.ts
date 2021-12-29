@@ -24,7 +24,7 @@ function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: str
 
   file.findOneAndDelete({ id: fileId }, () => {});
 
-  fs.unlinkSync(path);
+  fs.unlink(path, () => {});
 
   if (!ui) {
     res.status(200).json({

@@ -42,7 +42,7 @@ function handler(
       keepExtensions: true,
       maxFileSize: maxFileSize,
       allowEmptyFiles: false,
-      filename: function (name, ext, part, form) {
+      filename: function (name, ext) {
         return `${nanoid(36)}${ext}`;
       }
     });
@@ -121,7 +121,7 @@ function handler(
       })
     })
 
-    // TODO: Delete after X minutes
+    // TODO: Delete after X minutes property
 }
 
 export default connectDB(handler);
