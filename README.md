@@ -28,6 +28,6 @@ npm run start -- -p 8080
 
 ## ShareX Support
 
-If you want [ShareX](https://getsharex.com) support, you need enable `sharexSupport` in `.env.local`
-Then, you can use [this](https://github.com/xHyroM/Muploader/blob/master/tests/sharex.config.json) example config.
-^ You need edit URL, Authorization (if you have enabled `NEXT_PUBLIC_AUTHORIZATION`)
+If you want [ShareX](https://getsharex.com) support, you need enable `sharexSupport` in `.env.local`  
+Then, you can use [this](https://github.com/xHyroM/Muploader/blob/master/tests/sharex.config.json) example config.  
+^ You need edit URL, Authorization (if you have enabled `NEXT_PUBLIC_AUTHORIZATION`)  
