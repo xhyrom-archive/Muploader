@@ -61,7 +61,7 @@ async function handler(
         if (req.query.preview) {
           res.status(200).end(fs.readFileSync(schema.path));
         } else {
-          res.setHeader("content-disposition", "attachment; filename=" + schema.fileName);
+          res.setHeader('content-disposition', 'attachment; filename=' + schema.fileName);
           res.status(200).end(fs.readFileSync(schema.path));
         }
       }

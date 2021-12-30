@@ -82,9 +82,9 @@ function handler(
         {
           url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${fields['gcaptcha']}`,
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
           },
-          method: "GET",
+          method: 'GET',
         }
       ).catch(e => e);
 
