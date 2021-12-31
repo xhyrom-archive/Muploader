@@ -2,9 +2,11 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import '../styles/Preview.module.css';
 import absoluteUrl from 'next-absolute-url';
-import Highlight from 'react-highlight';
 import Util from 'hyttpo/dist/js/util/utils';
 import { Button } from 'react-bulma-components';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+import { useEffect } from 'react';
 
 const convertToBase64 = (buffer) => btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')).toString();
 
@@ -20,13 +22,17 @@ export const getServerSideProps = async(ctx) => {
 
     const isImage = data ? Buffer.from(data, 'base64').toString().includes('�') : false;
 
-    return { props: { data: data, url, isImage: isImage }};
+    return { props: { data: data, url, isImage: isImage, error: !data ? 'Invalid ?id' : null }};
 }
 
 const Preview: NextPage = ({ data, url, isImage, error }: any) => {
     const downloadFile = () => {
         window.location.replace(url.replace('&preview=true', ''));
     }
+
+    useEffect(() => {
+        Prism.highlightAll();
+    }, [])
 
     return (
         <div>
@@ -47,9 +53,13 @@ const Preview: NextPage = ({ data, url, isImage, error }: any) => {
                     : isImage ?
                         <img src={`https://http.cat/404`} alt='404' className='img-fluid' />
                     : 
-                        <Highlight>
-                            { data ? atob(data) : error ? error : 'Missing Authorization (?token)' }
-                        </Highlight>
+                        <div className='code'>
+                            <pre>
+                                <code className='language'>
+                                    { data ? atob(data) : error ? error : 'Missing Authorization (?token)' }
+                                </code>
+                            </pre>
+                        </div>
                     }
 
                     <div className='has-text-centered'>

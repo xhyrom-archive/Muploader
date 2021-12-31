@@ -1,11 +1,11 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { strToBool } from '../../utils/stringToBool';
-import Highlight from 'react-highlight';
-import '../../node_modules/highlight.js/styles/github.css';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { Button } from 'react-bulma-components';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
 
 export const getServerSideProps = () => {
     if (!strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT)) {
@@ -70,7 +70,8 @@ const ShareX: NextPage = () => {
             setObject(obj);
         }
 
-        set()
+        set();
+        Prism.highlightAll();
     }, []);
 
     return (
@@ -86,11 +87,15 @@ const ShareX: NextPage = () => {
                     ShareX Config
                 </h1>
 
-                <Highlight language={['javascript']}>
-                    {
-                        JSON.stringify(object, null, 2)
-                    }
-                </Highlight>
+                <div className='code'>
+                    <pre>
+                        <code className='language-json'>
+                            {
+                                JSON.stringify(object, null, 2)
+                            }
+                        </code>
+                    </pre>
+                </div>
 
                 <Button color='success' onClick={() => downloadFile()}>Download SXCU</Button>
             </main>
