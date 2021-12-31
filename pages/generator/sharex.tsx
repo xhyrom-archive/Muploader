@@ -7,11 +7,12 @@ import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { Button } from 'react-bulma-components';
 
-export const getStaticProps = () => {
+export const getServerSideProps = () => {
     if (!strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT)) {
         return {
             redirect: {
-              destination: "/",
+              destination: '/',
+              permanent: true,
             },
         }
     }
