@@ -86,7 +86,7 @@ const ShareX: NextPage = () => {
                     ShareX Config
                 </h1>
 
-                <Highlight language='json'>
+                <Highlight language={['javascript']}>
                     {
                         JSON.stringify(object, null, 2)
                     }

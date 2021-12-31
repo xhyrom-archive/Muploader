@@ -6,7 +6,7 @@ module.exports = {
     const webpack = require('webpack')
 
     config.plugins.push(
-      new webpack.ContextReplacementPlugin(/highlight.js\/lib\/languages$/, new RegExp(`^./(json)$`))
+      new webpack.ContextReplacementPlugin(/highlight\.js\/lib\/languages$/, new RegExp(`^./(javascript)$`))
     )
 
     return config;

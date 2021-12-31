@@ -4,7 +4,7 @@ import { CardGroup, Card } from 'react-bootstrap';
 import { getStats } from '../utils/statistics';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { config, dom } from '@fortawesome/fontawesome-svg-core';
-import '@fortawesome/fontawesome-free-solid';
+import { faFileImage, faHdd, faSun } from '@fortawesome/free-solid-svg-icons'
 
 config.autoAddCss = false;
 
@@ -43,7 +43,7 @@ const Statistics: NextPage = ({ uploads, storage, dailyuploads }: any) => {
                                 Files / Uploads
                             </Card.Text>
                             <Card.Title>
-                                <FontAwesomeIcon icon={['fas', 'file-image']} size='2x' />
+                                <FontAwesomeIcon icon={faFileImage} size='2x' />
                                 <span className='ml-2' style={{ fontSize: '35px' }}>{ uploads.toLocaleString('en-US') }</span>
                             </Card.Title>
                         </Card.Body>
@@ -54,7 +54,7 @@ const Statistics: NextPage = ({ uploads, storage, dailyuploads }: any) => {
                                 Storage Space Used
                             </Card.Text>
                             <Card.Title>
-                                <FontAwesomeIcon icon={['fas', 'hdd']} size='2x' />
+                                <FontAwesomeIcon icon={faHdd} size='2x' />
                                 <span className='ml-2' style={{ fontSize: '35px' }}>{ storage }</span>
                             </Card.Title>
                         </Card.Body>
@@ -65,7 +65,7 @@ const Statistics: NextPage = ({ uploads, storage, dailyuploads }: any) => {
                                 Daily Uploads
                             </Card.Text>
                             <Card.Title>
-                                <FontAwesomeIcon icon={['fas', 'sun']} size='2x' />
+                                <FontAwesomeIcon icon={faSun} size='2x' />
                                 <span className='ml-2' style={{ fontSize: '35px' }}>{ dailyuploads }</span>
                             </Card.Title>
                         </Card.Body>
