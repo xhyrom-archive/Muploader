@@ -10,7 +10,7 @@ const NavbarComponent = () => {
         const path = window.location.pathname;
 
         setItemActive(path);
-    })
+    }, [])
 
     return (
         <div style={{ top: 0 }}>
