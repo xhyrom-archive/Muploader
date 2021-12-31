@@ -10,8 +10,7 @@ Requirements:
 git clone https://github.com/xHyroM/Muploader.git
 cd Muploader
 
-npm i
-npm i -d
+npm ci
 
 # Rename template.env.local to .env.local
 mv template.env.local .env.local
@@ -28,6 +27,6 @@ npm run start -- -p 8080
 
 ## ShareX Support
 
-If you want [ShareX](https://getsharex.com) support, you need enable `sharexSupport` in `.env.local`  
-Then, you can use [this](https://github.com/xHyroM/Muploader/blob/master/tests/sharex.config.json) example config.  
+If you want [ShareX](https://getsharex.com) support, you need enable `NEXT_PUBLIC_SHAREX_SUPPORT` in `.env.local`  
+Then when you launch the page you go to the Config page (in navbar) where the config will be generated.
 ^ You need edit URL and Authorization (if you have enabled `NEXT_PUBLIC_AUTHORIZATION`)  

@@ -5,7 +5,7 @@ import ToSstyle from '../styles/ToS.module.css';
 
 const ToS: NextPage = () => {
     return (
-        <div className={styles.container}>
+        <div>
             <Head>
                 <title>Muploader</title>
                 <meta name='description' content='Muploader | Easy to share files' />
@@ -13,13 +13,13 @@ const ToS: NextPage = () => {
             </Head>
 
             <main>
+                <img src='/moderator.png' className={ToSstyle.tosimg}></img>
                 <h1 className={`title ${ToSstyle.tos}`}>
                     <span className={ToSstyle.tostext}>Terms of Services</span>
-                    <img src='/moderator.png' className={ToSstyle.tosimg}></img>
                 </h1>
 
                 <div className='page container'>
-                    <p>The Muploader website located at https://github.com/xHyroM/Muploader is a copyrighted work belonging to Muploader. Certain features of the Site may be subject to additional guidelines, terms, or rules, which will be posted on the Site in connection with such features.</p>
+                    <p>The Muploader website located at https://github.com/xHyroM/Muploader is a copyrighted work belonging to xHyroM. Certain features of the Site may be subject to additional guidelines, terms, or rules, which will be posted on the Site in connection with such features.</p>
 
                     <p>All such additional terms, guidelines, and rules are incorporated by reference into these Terms.</p>
 
@@ -57,15 +57,6 @@ const ToS: NextPage = () => {
                     <p>If you provide Company with any feedback or suggestions regarding the Site, you hereby assign to Company all rights in such Feedback and agree that Company shall have the right to use and fully exploit such Feedback and related information in any manner it believes appropriate.  Company will treat any Feedback you provide to Company as non-confidential and non-proprietary.</p>
 
                     <p>You agree to indemnify and hold Company and its officers, employees, and agents harmless, including costs and attorneys’ fees, from any claim or demand made by any third-party due to or arising out of (a) your use of the Site, (b) your violation of these Terms, (c) your violation of applicable laws or regulations or (d) your User Content.  Company reserves the right to assume the exclusive defense and control of any matter for which you are required to indemnify us, and you agree to cooperate with our defense of these claims.  You agree not to settle any matter without the prior written consent of Company.  Company will use reasonable efforts to notify you of any such claim, action or proceeding upon becoming aware of it.</p>
-
-                    <h2>Third-Party Links & Ads; Other Users</h2>
-
-                    <p><strong>Third-Party Links & Ads.</strong> The Site may contain links to third-party websites and services, and/or display advertisements for third-parties.  Such Third-Party Links & Ads are not under the control of Company, and Company is not responsible for any Third-Party Links & Ads.  Company provides access to these Third-Party Links & Ads only as a convenience to you, and does not review, approve, monitor, endorse, warrant, or make any representations with respect to Third-Party Links & Ads.  You use all Third-Party Links & Ads at your own risk, and should apply a suitable level of caution and discretion in doing so. When you click on any of the Third-Party Links & Ads, the applicable third party’s terms and policies apply, including the third party’s privacy and data gathering practices.</p>
-
-                    <p><strong>Other Users.</strong> Each Site user is solely responsible for any and all of its own User Content.  Because we do not control User Content, you acknowledge and agree that we are not responsible for any User Content, whether provided by you or by others.  You agree that Company will not be responsible for any loss or damage incurred as the result of any such interactions.  If there is a dispute between you and any Site user, we are under no obligation to become involved.</p>
-
-                    <p>You hereby release and forever discharge the Company and our officers, employees, agents, successors, and assigns from, and hereby waive and relinquish, each and every past, present and future dispute, claim, controversy, demand, right, obligation, liability, action and cause of action of every kind and nature, that has arisen or arises directly or indirectly out of, or that relates directly or indirectly to, the Site. If you are a California resident, you hereby waive California civil code section 1542 in connection with the foregoing, which states: &quot;a general release does not extend to claims which the creditor does not know or suspect to exist in his or her favor at the time of executing the release, which if known by him or her must have materially affected his or her settlement with the debtor.&quot;</p>
-
 
                     <h2 className='subtitle'>Disclaimers</h2>
 

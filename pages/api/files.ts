@@ -11,7 +11,7 @@ type Data = {
     data?: object;
 }
 
-function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, deleteKey: string, path: string, ui?: boolean) {
+const deleteFile = (req: NextApiRequest, res: NextApiResponse<Data>, fileId: string, deleteKey: string, path: string, ui?: boolean) => {
   if (
     strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) &&
     (req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN) &&
@@ -36,10 +36,10 @@ function deleteFile(req: NextApiRequest, res: NextApiResponse<Data>, fileId: str
   }
 }
 
-async function handler(
+const handler = async(
   req: NextApiRequest,
   res: NextApiResponse<Data>
-) {
+) => {
   if (!req.query.id) return res.status(400).json({ name: 'BAD REQUEST', message: 'Please add ?id to query' })
 
   const fileId = req.query.id as string;

@@ -25,7 +25,7 @@ export const config = {
 }
 
 const limiter = rateLimit({
-  interval: process.env.sharexRateLimitInterval,
+  interval: process.env.SHAREX_RATE_LIMIT_INTERVAL,
   uniqueTokenPerInterval: 100,
 })
 
@@ -89,8 +89,8 @@ function handler(
       ).catch(e => e);
 
       if (!verify.data.success) {
-        const rateLimit = limiter.check(res, process.env.sharexRateLimit, 'CACHE_TOKEN');
-        if (req.headers['user-agent'].includes('ShareX') && !rateLimit) {}
+        const rateLimit = limiter.check(res, process.env.SHAREX_RATE_LIMIT, 'CACHE_TOKEN');
+        if (strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT) && req.headers['user-agent'].includes('ShareX') && !rateLimit) {}
         else {
           files.file[0].destroy();
           
@@ -101,11 +101,15 @@ function handler(
         }
       }
 
-      const deleteKey = nanoid(15);
+      const deleteKey = nanoid(25);
       const newFileName = path.parse(files.file[0].newFilename.toString()).name;
 
-      let object: any = { id: newFileName, path: `./uploads/${files.file[0].newFilename.toString()}`, fileName: files.file[0].originalFilename.toString(), deleteKey: deleteKey };
-      if (fields.withoutAuth) object.withoutAuth = strToBool(fields.withoutAuth);
+      let object: any = {
+        id: newFileName,
+        path: `./uploads/${files.file[0].newFilename.toString()}`,
+        fileName: files.file[0].originalFilename.toString(), deleteKey: deleteKey,
+        withoutAuth: strToBool(fields.withoutAuth[0]) 
+      };
 
       await file.create(object);
 
@@ -114,8 +118,8 @@ function handler(
         message: {
           msg: 'File has been uploaded.',
           path: newFileName,
-          url: `${absoluteUrl(req).origin}/image?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
-          downloadUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!fields.withoutAuth ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
+          url: `${absoluteUrl(req).origin}/preview?id=${newFileName}${!strToBool(fields.withoutAuth[0]) ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
+          downloadUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!strToBool(fields.withoutAuth[0]) ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
           deleteUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${process.env.AUTHORIZATION_TOKEN ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&del=${deleteKey}`,
         }, 
       })

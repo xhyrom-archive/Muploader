@@ -3,8 +3,8 @@ import Head from 'next/head';
 import { createRef, LegacyRef, useEffect, useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import Swal from 'sweetalert2'
-import styles from '../styles/Home.module.css';
 import Link from 'next/link';
+import { ProgressBar } from 'react-bootstrap';
 import { strToBool } from '../utils/stringToBool';
 import hyttpo from 'hyttpo';
 
@@ -95,7 +95,10 @@ const Home: NextPage = () => {
         'Authorization': result?.value
       },
       onUploadProgress: (p) => {
-        setInfoAlert({ 
+        const percentage = Math.floor( (p.loaded * 100) / p.total );
+
+        setInfoAlert({
+          percentage,
           message: `${formatBytes(p.loaded)} / ${formatBytes(p.total)}`
         });
       }
@@ -115,11 +118,11 @@ const Home: NextPage = () => {
 
   const changeInput = (obj: any) => {
     const name = obj.target.files[0].name;
-    setFileName(name);
+    setFileName(`${name.slice(0, 20)}${name.length > 20 ? '...' : ''}`);
   }
 
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Muploader</title>
         <meta name='description' content='Muploader | Easy to share files' />
@@ -133,8 +136,21 @@ const Home: NextPage = () => {
 
         { !infoAlert.nothing ? <div className='notification is-primary is-light'>
           { infoAlert.url ? 
-          <><Link href={infoAlert.url}><a>Preview: {infoAlert.url}</a></Link><br /><Link href={infoAlert.downloadUrl}><a>Download: {infoAlert.downloadUrl}</a></Link><br /><Link href={infoAlert.deleteUrl}><a>Delete: {infoAlert.deleteUrl}</a></Link></>
-          : infoAlert.message }
+            <>
+              <Link href={infoAlert.url}><a target={'_blank'}>Preview: {infoAlert.url}</a></Link>
+              <br />
+              <Link href={infoAlert.downloadUrl}><a target={'_blank'}>Download: {infoAlert.downloadUrl}</a></Link>
+              <br />
+              <Link href={infoAlert.deleteUrl}><a target={'_blank'}>Delete: {infoAlert.deleteUrl}</a></Link>
+            </>
+            : infoAlert.percentage ?
+            <>
+              {infoAlert.message}
+              <ProgressBar now={infoAlert.percentage} variant='info' label={`${infoAlert.percentage}%`} />
+            </>
+            :
+            infoAlert.message
+          }
         </div> : '' } 
 
         <form className='box' onSubmit={handleSubmit} id='fileUploadForm'>
