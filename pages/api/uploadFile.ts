@@ -84,9 +84,12 @@ function handler(
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
           },
-          method: 'GET',
+          body: JSON.stringify({}),
+          method: 'POST',
         }
       ).catch(e => e);
+
+      console.log(verify);
 
       if (!verify.data.success) {
         const rateLimit = limiter.check(res, process.env.SHAREX_RATE_LIMIT, 'CACHE_TOKEN');

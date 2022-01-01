@@ -1,7 +1,8 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { createRef, LegacyRef, useEffect, useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { RecaptchaComponent } from '../components/recaptcha';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import Swal from 'sweetalert2'
 import Link from 'next/link';
 import { ProgressBar } from 'react-bootstrap';
@@ -9,15 +10,10 @@ import { strToBool } from '../utils/stringToBool';
 import hyttpo from 'hyttpo';
 
 const Home: NextPage = () => {
-  const recaptchaRef: LegacyRef<ReCAPTCHA> = createRef();
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
   const [fileName, setFileName] = useState('Nothing');
-
   const [infoAlert, setInfoAlert]: any = useState({ nothing: true });
-
-  useEffect(() => {
-    const $recaptcha = document.querySelector('#g-recaptcha-response');
-    if($recaptcha) $recaptcha.setAttribute('required', 'required');
-  })
 
   const formatBytes = (bytes: number, decimals?: number) => {
     if (!decimals) decimals = 2;
@@ -35,7 +31,6 @@ const Home: NextPage = () => {
   const clearForm = () => {
     const fileUploadForm: any = document.getElementById('fileUploadForm');
 
-    recaptchaRef.current?.reset();
     fileUploadForm?.reset();
     setFileName('Nothing');
   }
@@ -43,7 +38,7 @@ const Home: NextPage = () => {
   const handleSubmit = async(event: any) => {
     event.preventDefault();
 
-    if (recaptchaRef.current?.getValue()?.length === 0) return;
+    const recaptchaToken = await executeRecaptcha('upload');
   
     let result;
     if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION)) {
@@ -80,12 +75,10 @@ const Home: NextPage = () => {
     if (file.size > 1000000000) return setInfoAlert({ message: 'Maximum allowed size is 1GB' });
 
     form.append('file', file);
-    form.append('gcaptcha', recaptchaRef.current?.getValue() || 'none');
+    form.append('gcaptcha', recaptchaToken || 'none');
     form.append('tos-accept', ToSCheckBox.checked);
 
     if (checkbox) form.append('withoutAuth', checkbox.checked);
-
-    recaptchaRef.current?.reset();
 
     const res = await hyttpo.request({
       method: 'POST',
@@ -171,14 +164,6 @@ const Home: NextPage = () => {
             </label>
           </div>
 
-          <div className='field is-boxed'>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              size='normal'
-              sitekey={process.env.NEXT_PUBLIC_SITE_KEY}
-	          />
-          </div>
-
           { strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION)
           ? <>
             <div className='field control checkbox is-checkbox'>
@@ -208,4 +193,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home;
+export default RecaptchaComponent(Home);
