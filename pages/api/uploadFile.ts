@@ -9,6 +9,7 @@ import path from 'path';
 import absoluteUrl from 'next-absolute-url';
 import { strToBool } from '../../utils/stringToBool';
 import { rateLimit } from '../../utils/rateLimit';
+import { VerifyKey } from '../../middleware/verifyKeys';
 
 type Data = {
   name: string;
@@ -40,6 +41,7 @@ const handler = (
 		keepExtensions: true,
 		maxFileSize: maxFileSize,
 		allowEmptyFiles: false,
+		multiples: false,
 		filename: function (name, ext) {
 			return `${nanoid(36)}${ext}`;
 		}
@@ -51,7 +53,6 @@ const handler = (
 
 	form.parse(req, async(err: any, fields: any, files: any) => {
 		if (err) {
-			console.log(err);
 			res.setHeader('Connection', 'close');
 
 			return res.status(413).json({
@@ -67,7 +68,7 @@ const handler = (
 			});
 		}
 
-		if (!fields || fields.length === 0 || !fields['gcaptcha']) {
+		if (!fields || fields.length === 0 || !fields['gcaptcha']?.[0]) {
 			files.file[0].destroy();
 
 			return res.status(422).json({
@@ -76,26 +77,27 @@ const handler = (
 			});
 		}
 
-		const verify = await hyttpo.request(
-			{
-				url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${fields['gcaptcha']}`,
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-				},
-				body: JSON.stringify({}),
-				method: 'POST',
-			}
-		).catch(e => e);
+		const verify = VerifyKey.getCaptcha(fields['gcaptcha'][0]);
+		VerifyKey.deleteCaptcha(fields['gcaptcha'][0]);
 
-		if (!verify.data.success) {
+		if (!verify || verify === 1) {
+			files.file[0].destroy();
+
+			return res.status(422).json({
+				name: 'UNPROCESSABLE ENTITY',
+				message: 'Invalid captcha key!'
+			});
+		}
+
+		if (verify === 0) {
 			const rateLimit = limiter.check(res, process.env.SHAREX_RATE_LIMIT, 'CACHE_TOKEN');
-			if (strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT) && req.headers['user-agent'].includes('ShareX') && !rateLimit) {} // eslint-disable-line no-empty
-			else {
+
+			if (rateLimit) {
 				files.file[0].destroy();
-          
-				return res.status(rateLimit ? 429 : 422).json({
-					name: rateLimit ? 'TOO MANY REQUESTS' : 'UNPROCESSABLE ENTITY',
-					message: rateLimit ? 'Rate limit' : 'Invalid captcha key!'
+
+				return res.status(429).json({
+					name: 'TOO MANY REQUESTS',
+					message: 'Rate limit'
 				});
 			}
 		}

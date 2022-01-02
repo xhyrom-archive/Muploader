@@ -63,26 +63,39 @@ const Home: NextPage = () => {
 			});
 
 			return;
-		} 
-
-		const ToSCheckBox: any = document.getElementById('tosCheckbox');
-		const checkbox: any = document.getElementById('withoutAuth');
-		const form = new FormData();
+		}
 
 		let file: any = document.getElementById('fileInput');
 		file = file?.files?.[0] || file;
 
 		if (file.size > 1000000000) return setInfoAlert({ message: 'Maximum allowed size is 1GB' });
 
+		const captchaRes = await hyttpo.request({
+			method: 'POST',
+			url: window.location + 'api/captcha',
+			body: JSON.stringify({
+				gcaptcha: recaptchaToken || 'none'
+			}),
+			headers: {
+				'Authorization': result?.value
+			}
+		}).catch(e => e);
+
+		console.log(captchaRes)
+
+		const ToSCheckBox: any = document.getElementById('tosCheckbox');
+		const checkbox: any = document.getElementById('withoutAuth');
+		const form = new FormData();
+
 		form.append('file', file);
-		form.append('gcaptcha', recaptchaToken || 'none');
+		form.append('gcaptcha', captchaRes.data.message || 'none');
 		form.append('tos-accept', ToSCheckBox.checked);
 
 		if (checkbox) form.append('withoutAuth', checkbox.checked);
 
 		const res = await hyttpo.request({
 			method: 'POST',
-			url: window.location + '/api/uploadFile',
+			url: window.location + 'api/uploadFile',
 			body: form,
 			headers: {
 				'Authorization': result?.value
