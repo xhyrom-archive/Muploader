@@ -1,14 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-
-// @ts-ignore
 import * as formidable from 'formidable';
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid';
 import hyttpo from 'hyttpo';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
 import path from 'path';
-import absoluteUrl from 'next-absolute-url'
+import absoluteUrl from 'next-absolute-url';
 import { strToBool } from '../../utils/stringToBool';
 import { rateLimit } from '../../utils/rateLimit';
 
@@ -19,116 +17,114 @@ type Data = {
 }
 
 export const config = {
-    api: {
-      bodyParser: false
-    }
-}
+	api: {
+		bodyParser: false
+	}
+};
 
 const limiter = rateLimit({
-  interval: process.env.SHAREX_RATE_LIMIT_INTERVAL,
-  uniqueTokenPerInterval: 100,
-})
+	interval: process.env.SHAREX_RATE_LIMIT_INTERVAL,
+	uniqueTokenPerInterval: 100,
+});
 
 function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
+	req: NextApiRequest,
+	res: NextApiResponse<Data>
 ) {
-    if (req.method !== 'POST') return res.status(400).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
-    if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: `Invalid authorization token!` });
+	if (req.method !== 'POST') return res.status(400).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
+	if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: 'Invalid authorization token!' });
 
-    const maxFileSize = 1000000000;
-    const form: any = new formidable.IncomingForm({
-      uploadDir: `./uploads/`,
-      keepExtensions: true,
-      maxFileSize: maxFileSize,
-      allowEmptyFiles: false,
-      filename: function (name, ext) {
-        return `${nanoid(36)}${ext}`;
-      }
-    });
+	const maxFileSize = 1000000000;
+	const form: any = new formidable.IncomingForm({
+		uploadDir: './uploads/',
+		keepExtensions: true,
+		maxFileSize: maxFileSize,
+		allowEmptyFiles: false,
+		filename: function (name, ext) {
+			return `${nanoid(36)}${ext}`;
+		}
+	});
 
-    form.on('field', async(name: any, value: any) => {
-      if (name === 'tos-accept' && !strToBool(value)) form._error('You must accept our ToS!');
-    })
+	form.on('field', async(name: any, value: any) => {
+		if (name === 'tos-accept' && !strToBool(value)) form._error('You must accept our ToS!');
+	});
 
-    form.parse(req, async(err: any, fields: any, files: any) => {
-      if (err) {
-        console.log(err)
-        res.setHeader('Connection', 'close');
+	form.parse(req, async(err: any, fields: any, files: any) => {
+		if (err) {
+			console.log(err);
+			res.setHeader('Connection', 'close');
 
-        return res.status(413).json({
-          name: 'TOO LARGE',
-          message: typeof err === 'object' ? 'Maximum allowed size is 1 GB' : err
-        });
-      }
+			return res.status(413).json({
+				name: 'TOO LARGE',
+				message: typeof err === 'object' ? 'Maximum allowed size is 1 GB' : err
+			});
+		}
 
-      if (!files || files.length === 0) {
-        return res.status(422).json({
-          name: 'UNPROCESSABLE ENTITY',
-          message: 'Missing files!'
-        });
-      }
+		if (!files || files.length === 0) {
+			return res.status(422).json({
+				name: 'UNPROCESSABLE ENTITY',
+				message: 'Missing files!'
+			});
+		}
 
-      if (!fields || fields.length === 0 || !fields['gcaptcha']) {
-        files.file[0].destroy();
+		if (!fields || fields.length === 0 || !fields['gcaptcha']) {
+			files.file[0].destroy();
 
-        return res.status(422).json({
-          name: 'UNPROCESSABLE ENTITY',
-          message: 'Missing gcaptcha!'
-        });
-      }
+			return res.status(422).json({
+				name: 'UNPROCESSABLE ENTITY',
+				message: 'Missing gcaptcha!'
+			});
+		}
 
-      const verify = await hyttpo.request(
-        {
-          url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${fields['gcaptcha']}`,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-          },
-          body: JSON.stringify({}),
-          method: 'POST',
-        }
-      ).catch(e => e);
+		const verify = await hyttpo.request(
+			{
+				url: `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.SECRET_KEY}&response=${fields['gcaptcha']}`,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+				},
+				body: JSON.stringify({}),
+				method: 'POST',
+			}
+		).catch(e => e);
 
-      console.log(verify);
-
-      if (!verify.data.success) {
-        const rateLimit = limiter.check(res, process.env.SHAREX_RATE_LIMIT, 'CACHE_TOKEN');
-        if (strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT) && req.headers['user-agent'].includes('ShareX') && !rateLimit) {}
-        else {
-          files.file[0].destroy();
+		if (!verify.data.success) {
+			const rateLimit = limiter.check(res, process.env.SHAREX_RATE_LIMIT, 'CACHE_TOKEN');
+			if (strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT) && req.headers['user-agent'].includes('ShareX') && !rateLimit) {} // eslint-disable-line no-empty
+			else {
+				files.file[0].destroy();
           
-          return res.status(rateLimit ? 429 : 422).json({
-            name: rateLimit ? 'TOO MANY REQUESTS' : 'UNPROCESSABLE ENTITY',
-            message: rateLimit ? 'Rate limit' : 'Invalid captcha key!'
-          });
-        }
-      }
+				return res.status(rateLimit ? 429 : 422).json({
+					name: rateLimit ? 'TOO MANY REQUESTS' : 'UNPROCESSABLE ENTITY',
+					message: rateLimit ? 'Rate limit' : 'Invalid captcha key!'
+				});
+			}
+		}
 
-      const deleteKey = nanoid(25);
-      const newFileName = path.parse(files.file[0].newFilename.toString()).name;
+		const deleteKey = nanoid(25);
+		const newFileName = path.parse(files.file[0].newFilename.toString()).name;
 
-      let object: any = {
-        id: newFileName,
-        path: `./uploads/${files.file[0].newFilename.toString()}`,
-        fileName: files.file[0].originalFilename.toString(), deleteKey: deleteKey,
-        withoutAuth: strToBool(fields.withoutAuth[0]) 
-      };
+		const object: any = {
+			id: newFileName,
+			path: `./uploads/${files.file[0].newFilename.toString()}`,
+			fileName: files.file[0].originalFilename.toString(), deleteKey: deleteKey,
+			withoutAuth: strToBool(fields.withoutAuth[0]) 
+		};
 
-      await file.create(object);
+		await file.create(object);
 
-      res.status(200).json({ 
-        name: 'OK',
-        message: {
-          msg: 'File has been uploaded.',
-          path: newFileName,
-          url: `${absoluteUrl(req).origin}/preview?id=${newFileName}${!strToBool(fields.withoutAuth[0]) ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
-          downloadUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!strToBool(fields.withoutAuth[0]) ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
-          deleteUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${process.env.AUTHORIZATION_TOKEN ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&del=${deleteKey}`,
-        }, 
-      })
-    })
+		res.status(200).json({ 
+			name: 'OK',
+			message: {
+				msg: 'File has been uploaded.',
+				path: newFileName,
+				url: `${absoluteUrl(req).origin}/preview?id=${newFileName}${!strToBool(fields.withoutAuth[0]) ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
+				downloadUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${!strToBool(fields.withoutAuth[0]) ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}`,
+				deleteUrl: `${absoluteUrl(req).origin}/api/files?id=${newFileName}${process.env.AUTHORIZATION_TOKEN ? `&token=${process.env.AUTHORIZATION_TOKEN}` : ''}&del=${deleteKey}`,
+			}, 
+		});
+	});
 
-    // TODO: Delete after X minutes property
+	// TODO: Delete after X minutes property
 }
 
 export default connectDB(handler);
