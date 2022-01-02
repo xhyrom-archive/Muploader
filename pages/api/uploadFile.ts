@@ -27,10 +27,10 @@ const limiter = rateLimit({
 	uniqueTokenPerInterval: 100,
 });
 
-function handler(
+const handler = (
 	req: NextApiRequest,
 	res: NextApiResponse<Data>
-) {
+) => {
 	if (req.method !== 'POST') return res.status(400).json({ name: 'Bad Request', message: `Use POST instead of ${req.method}` });
 	if (strToBool(process.env.NEXT_PUBLIC_AUTHORIZATION) && req.headers['authorization'] !== process.env.AUTHORIZATION_TOKEN)  return res.status(403).json({ name: 'Forbidden', message: 'Invalid authorization token!' });
 
