@@ -127,6 +127,6 @@ const handler = (
 	});
 
 	// TODO: Delete after X minutes property
-}
+};
 
 export default connectDB(handler);
