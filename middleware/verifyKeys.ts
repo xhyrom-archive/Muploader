@@ -4,7 +4,7 @@ export class VerifyKeyManager {
 	cache;
 	constructor() {
 		this.cache = new LRU({
-			maxAge: 18000000 
+			maxAge: 7_200_000  
 		});
 	}
 
