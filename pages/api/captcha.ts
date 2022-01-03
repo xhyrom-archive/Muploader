@@ -39,37 +39,20 @@ const handler = async(
 	).catch(e => e);
 	const id = nanoid(15);
 
-	if (!verify.data.success) {
-		if (strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT) && req.headers['user-agent'].includes('ShareX')) {
-			VerifyKey.setCaptcha({
-				key: id,
-				type: 0
-			});
-
-			res.status(200).json({
-				name: 'OK',
-				message: id
-			});
-		} else {
-			VerifyKey.setCaptcha({
-				key: id,
-				type: 1
-			});
-
-			res.status(200).json({
-				name: 'OK',
-				message: id
-			});
-		}
-	} else {
+	if (verify.data.success) {
 		VerifyKey.setCaptcha({
 			key: id,
 			type: 2
 		});
 
-		res.status(200).json({
+		return res.status(200).json({
 			name: 'OK',
 			message: id
+		});
+	} else {
+		return res.status(422).json({
+			name: 'UNPROCESSABLE ENTITY',
+			message: 'Invalid captcha key!'
 		});
 	}
 };

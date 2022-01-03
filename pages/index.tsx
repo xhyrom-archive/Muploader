@@ -81,7 +81,7 @@ const Home: NextPage = () => {
 			}
 		}).catch(e => e);
 
-		console.log(captchaRes);
+		if (!captchaRes.ok) return setInfoAlert({ message: `Error: ${captchaRes.data.message} (${captchaRes.status})` });
 
 		const ToSCheckBox: any = document.getElementById('tosCheckbox');
 		const checkbox: any = document.getElementById('withoutAuth');

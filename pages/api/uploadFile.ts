@@ -2,7 +2,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as formidable from 'formidable';
 import { nanoid } from 'nanoid';
-import hyttpo from 'hyttpo';
 import connectDB from '../../middleware/mongodb';
 import file from '../../models/file';
 import path from 'path';
@@ -80,24 +79,16 @@ const handler = (
 		const verify = VerifyKey.getCaptcha(fields['gcaptcha'][0]);
 		VerifyKey.deleteCaptcha(fields['gcaptcha'][0]);
 
-		if (!verify || verify === 1) {
-			files.file[0].destroy();
-
-			return res.status(422).json({
-				name: 'UNPROCESSABLE ENTITY',
-				message: 'Invalid captcha key!'
-			});
-		}
-
-		if (verify === 0) {
+		if (!verify) {
 			const rateLimit = limiter.check(res, process.env.SHAREX_RATE_LIMIT, 'CACHE_TOKEN');
 
-			if (rateLimit) {
+			if (strToBool(process.env.NEXT_PUBLIC_SHAREX_SUPPORT) && req.headers['user-agent'].includes('ShareX') && !rateLimit) {} // eslint-disable-line no-empty
+			else {
 				files.file[0].destroy();
 
-				return res.status(429).json({
-					name: 'TOO MANY REQUESTS',
-					message: 'Rate limit'
+				return res.status(rateLimit ? 429 : 422).json({
+					name: rateLimit ? 'TOO MANY REQUESTS' : 'UNPROCESSABLE ENTITY',
+					message: rateLimit ? 'Rate limit' : 'Invalid captcha key!'
 				});
 			}
 		}
