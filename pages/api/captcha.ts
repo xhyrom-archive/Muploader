@@ -40,7 +40,7 @@ const handler = async(
 	const id = nanoid(15);
 
 	if (verify.data.success) {
-		VerifyKey.setCaptcha({
+		await VerifyKey.setCaptcha({
 			key: id,
 			type: 2
 		});

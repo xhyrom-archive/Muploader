@@ -76,7 +76,7 @@ const handler = (
 			});
 		}
 
-		const verify = VerifyKey.getCaptcha(fields['gcaptcha'][0]);
+		const verify = await VerifyKey.getCaptcha(fields['gcaptcha'][0]);
 		VerifyKey.deleteCaptcha(fields['gcaptcha'][0]);
 
 		if (!verify) {

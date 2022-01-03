@@ -1,23 +1,30 @@
-import LRU from 'lru-cache';
+import keySchema from '../models/key';
+import { getConnection } from './mongodb';
 
 export class VerifyKeyManager {
-	cache;
 	constructor() {
-		this.cache = new LRU({
-			maxAge: 7_200_000  
-		});
+		getConnection();
 	}
 
-	setCaptcha(options) {
-		this.cache.set(options.key, options.type);
+	async setCaptcha(options) {
+		const value = await keySchema.create({
+			key: options.key,
+			type: options.type
+		}).catch(e => e)
+
+		return value;
 	}
 
-	getCaptcha(key) {
-		return this.cache.get(key);
+	async getCaptcha(key) {
+		const value = await keySchema.findOne({ key }).exec();
+		
+		return value?.type;
 	}
 
 	deleteCaptcha(key) {
-		return this.cache.del(key);
+		keySchema.findOneAndDelete({ key }, () => {});
+
+		return;
 	}
 }
 
