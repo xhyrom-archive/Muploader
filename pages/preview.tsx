@@ -13,7 +13,7 @@ const convertToBase64 = (buffer) => btoa(new Uint8Array(buffer).reduce((data, by
 export const getServerSideProps = async(ctx) => {
 	const { id, token } = ctx.query;
 
-	const url = `${absoluteUrl(ctx.req).origin}/api/files?id=${id}${token ? `&token=${token}` : ''}&preview=true`;
+	const url = `${absoluteUrl(ctx.req).origin}/api/files?id=${id}${token ? `&token=${token}` : ''}`;
 	const res = await fetch(`${absoluteUrl(ctx.req).origin}/api/files?id=${id}${token ? `&token=${token}` : ''}`, { method: 'GET' }).then((res) => res.arrayBuffer());
 
 	if (res.byteLength > 4000000) return { props: { data: null, url, isImage: false, error: 'File has more than 4 MB.' } };

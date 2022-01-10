@@ -61,6 +61,7 @@ const handler = async(
 		if (req.query.del) deleteFile(req, res, fileId, schema.deleteKey, schema.path, true);
 		else {
 			if (req.query.preview) {
+				res.setHeader('content-type', 'image/png');
 				res.status(200).end(fs.readFileSync(schema.path));
 			} else {
 				res.setHeader('content-disposition', 'attachment; filename=' + schema.fileName);
