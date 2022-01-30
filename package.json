@@ -21,7 +21,7 @@
         "kerberos": "^1.1.7",
         "lru-cache": "^6.0.0",
         "mongodb-client-encryption": "^1.2.7",
-        "mongoose": "^6.1.1",
+        "mongoose": "^6.1.5",
         "nanoid": "^3.1.31",
         "next": "12.0.9",
         "next-absolute-url": "^1.2.2",
