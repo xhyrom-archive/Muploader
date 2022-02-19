@@ -23,7 +23,7 @@
         "mongodb-client-encryption": "^1.2.7",
         "mongoose": "^6.1.5",
         "nanoid": "^3.1.31",
-        "next": "12.0.9",
+        "next": "12.1.0",
         "next-absolute-url": "^1.2.2",
         "next-secure-headers": "^2.2.0",
         "prismjs": "^1.26.0",
