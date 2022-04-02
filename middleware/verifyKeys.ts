@@ -10,7 +10,7 @@ export class VerifyKeyManager {
 		const value = await keySchema.create({
 			key: options.key,
 			type: options.type
-		}).catch(e => e)
+		}).catch(e => e);
 
 		return value;
 	}
@@ -22,6 +22,7 @@ export class VerifyKeyManager {
 	}
 
 	deleteCaptcha(key) {
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		keySchema.findOneAndDelete({ key }, () => {});
 
 		return;

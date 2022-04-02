@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as formidable from 'formidable';
 import { nanoid } from 'nanoid';
@@ -116,8 +115,6 @@ const handler = (
 			}, 
 		});
 	});
-
-	// TODO: Delete after X minutes property
 };
 
 export default connectDB(handler);

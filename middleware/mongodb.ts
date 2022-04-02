@@ -16,6 +16,6 @@ export const getConnection = async() => {
 
 	await mongoose.connect(process.env.MONGO_URL);
 	return mongoose.connections[0];
-}
+};
 
 export default connectDB;

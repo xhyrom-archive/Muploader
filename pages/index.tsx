@@ -8,25 +8,13 @@ import Link from 'next/link';
 import { ProgressBar } from 'react-bootstrap';
 import { strToBool } from '../utils/stringToBool';
 import hyttpo from 'hyttpo';
+import { formatBytes } from '../utils/formatBytes';
 
 const Home: NextPage = () => {
 	const { executeRecaptcha } = useGoogleReCaptcha();
 
 	const [fileName, setFileName] = useState('Nothing');
 	const [infoAlert, setInfoAlert]: any = useState({ nothing: true });
-
-	const formatBytes = (bytes: number, decimals?: number) => {
-		if (!decimals) decimals = 2;
-		if (bytes === 0) return '0 Bytes';
-
-		const k = 1024;
-		const dm = decimals < 0 ? 0 : decimals;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-	};
 
 	const clearForm = () => {
 		const fileUploadForm: any = document.getElementById('fileUploadForm');
@@ -137,7 +125,7 @@ const Home: NextPage = () => {
 
 			<main>
 				<h1 className='title'>
-          Easy to share files!
+					Easy to share files!
 				</h1>
 
 				{ !infoAlert.nothing ? <div className='notification is-primary is-light'>
@@ -168,7 +156,7 @@ const Home: NextPage = () => {
 									<i className='fas fa-upload'></i>
 								</span>
 								<span className='file-label'>
-                  Choose a file…
+									Choose a file…
 								</span>
 							</span>
 							<span className='file-name'>
@@ -182,7 +170,7 @@ const Home: NextPage = () => {
 							<div className='field control checkbox is-checkbox'>
 								<label className='checkbox'>
 									<input type='checkbox' id='withoutAuth'/>
-                See file without authorization
+									See file without authorization
 								</label>
 							</div>
 							<br />
@@ -193,7 +181,7 @@ const Home: NextPage = () => {
 					<div className='field control checkbox is-checkbox'>
 						<label className='checkbox'>
 							<input type='checkbox' id='tosCheckbox' />
-              I agree to the <Link href='/tos'><a>terms and services</a></Link>
+							I agree to the <Link href='/tos'><a>terms and services</a></Link>
 						</label>
 					</div>
 

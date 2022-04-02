@@ -18,6 +18,7 @@
         "bson-ext": "^4.0.2",
         "formidable": "github:node-formidable/formidable",
         "hyttpo": "^0.3.5",
+        "image-type": "^4.1.0",
         "kerberos": "^1.1.7",
         "lru-cache": "^6.0.0",
         "mongodb-client-encryption": "^1.2.7",

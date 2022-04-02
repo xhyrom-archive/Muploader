@@ -7,6 +7,7 @@ import { Button } from 'react-bulma-components';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
 import { useEffect } from 'react';
+import { isImage } from '../utils/isImage';
 
 const convertToBase64 = (buffer) => btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')).toString();
 
@@ -19,10 +20,9 @@ export const getServerSideProps = async(ctx) => {
 	if (res.byteLength > 4000000) return { props: { data: null, url, isImage: false, error: 'File has more than 4 MB.' } };
 
 	const data = Util.isJSON(Buffer.from(res).toString('utf-8')) ? null : convertToBase64(res)?.toString();
+	const image = isImage(res);
 
-	const isImage = data ? Buffer.from(data, 'base64').toString().includes('�') : false;
-
-	return { props: { data: data, url, isImage: isImage, error: !data ? 'Invalid ?id' : null }};
+	return { props: { data: data, url, isImage: image, error: !data ? 'Invalid ?id' : null }};
 };
 
 const Preview: NextPage = ({ data, url, isImage, error }: any) => {
@@ -55,7 +55,7 @@ const Preview: NextPage = ({ data, url, isImage, error }: any) => {
 							: 
 							<div className='code'>
 								<pre>
-									<code className='language'>
+									<code className='language-javascript'>
 										{ data ? atob(data) : error ? error : 'Missing Authorization (?token)' }
 									</code>
 								</pre>
