@@ -21,7 +21,7 @@
         "image-type": "^4.1.0",
         "kerberos": "^1.1.7",
         "lru-cache": "^6.0.0",
-        "mongodb-client-encryption": "^1.2.7",
+        "mongodb-client-encryption": "^2.0.0",
         "mongoose": "^6.1.5",
         "nanoid": "^3.1.31",
         "next": "12.1.0",
