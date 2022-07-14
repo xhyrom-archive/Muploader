@@ -19,7 +19,7 @@
         "formidable": "github:node-formidable/formidable",
         "hyttpo": "^0.3.5",
         "image-type": "^4.1.0",
-        "kerberos": "^1.1.7",
+        "kerberos": "^2.0.1",
         "lru-cache": "^6.0.0",
         "mongodb-client-encryption": "^2.0.0",
         "mongoose": "^6.1.5",
